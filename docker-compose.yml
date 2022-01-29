@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+
+  php:
+    container_name: ${PJ_NAME}-php
+    build: docker/php
+    volumes:
+      - ${PHP}:/var/www/html
+    ports:
+      - 80:80
+    depends_on:
+      - ${DB_HOST}
+
+  db:
+    container_name: ${PJ_NAME}-db
+    build: ./docker/mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_USER:  ${DB_USER}
+      MYSQL_PASSWORD: ${DB_PASSWD}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWD}
+      TZ: ${TZ}
+    ports:
+      - 3300:3306
+
+  pma:
+    container_name: ${PJ_NAME}-pma
+    image: phpmyadmin:latest
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: ${DB_HOST}
+      PMA_USER: ${DB_USER}
+      PMA_PASSWORD: ${DB_PASSWD}
+    depends_on:
+      - ${DB_HOST}
+    ports:
+      - 8080:80
+    volumes:
+      - ${SQLTOOL}:/sessions
+
+networks:
+  default:
+    name: ${PJ_NAME}-net
