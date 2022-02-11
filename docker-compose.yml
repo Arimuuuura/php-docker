@@ -7,10 +7,16 @@ services:
     build: docker/php
     volumes:
       - ${PHP}:/var/www/html
+
+  web:
+    container_name: ${PJ_NAME}-web
+    image: nginx:1.20-alpine
     ports:
       - 80:80
-    depends_on:
-      - ${DB_HOST}
+    volumes:
+      - ${PHP}:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    working_dir: /var/www/html
 
   db:
     container_name: ${PJ_NAME}-db
@@ -22,6 +28,8 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWD}
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWD}
       TZ: ${TZ}
+    volumes:
+      - .${DATA}:/var/lib/mysql
     ports:
       - 3300:3306
 
